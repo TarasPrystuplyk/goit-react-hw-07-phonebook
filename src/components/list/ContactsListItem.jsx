@@ -1,17 +1,21 @@
-// import PropTypes from 'prop-types';
-// import { ContactsItem, DeleteButton, Text } from './ContactsItemStyled';
-// export const ContactsListItem = ({ item, deleteContact }) => {
-//   return (
-//     <ContactsItem>
-//       <Text>Name: {item.name}</Text>
-//       <Text>Number: {item.number}</Text>
-//       <DeleteButton type="button" onClick={() => deleteContact(item.id)}>
-//         Delete
-//       </DeleteButton>
-//     </ContactsItem>
-//   );
-// };
-// ContactsListItem.propTypes = {
-//   deleteContact: PropTypes.func,
-//   item: PropTypes.objectOf(PropTypes.string),
-// };
+import { ContactsItem, DeleteButton, Text } from './ContactsItemStyled';
+import { useDeleteContactMutation } from '../../redux/contactsApi';
+import { Spinner } from 'components/spinner/Spinner';
+
+export const ContactItem = ({ id, name, phone }) => {
+  const [deleteContact, { isLoading: isDeleting }] = useDeleteContactMutation();
+  return (
+    <ContactsItem>
+      <Text>Name: {name}</Text>
+      <Text>Number: {phone}</Text>
+      <DeleteButton
+        type="button"
+        onClick={() => deleteContact(id)}
+        disabled={isDeleting}
+      >
+        {isDeleting && <Spinner size={12} />}
+        Delete
+      </DeleteButton>
+    </ContactsItem>
+  );
+};

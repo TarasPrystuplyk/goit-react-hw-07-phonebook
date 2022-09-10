@@ -30,7 +30,10 @@ export const SubmitButton = styled.button`
   margin-top: ${p => p.theme.space[3]}px;
   display: flex;
   justify-content: center;
+  text-align: center;
+  align-items: center;
   width: 140px;
+  height: 40px;
   margin-top: ${p => p.theme.space[4]}px;
   padding: ${p => p.theme.space[2]}px;
   color: ${p => p.theme.colors.accentText};

@@ -1,33 +1,37 @@
-import { useDispatch, useSelector } from 'react-redux';
 import { Formik } from 'formik';
-import { nanoid } from 'nanoid';
+import { toast } from 'react-toastify';
+import {
+  useCreateContactMutation,
+  useFetchContactsQuery,
+} from 'redux/contactsApi';
+import { Spinner } from 'components/spinner/Spinner';
 import { Box, Input, InputName, SubmitButton } from './FormContactsStyled';
-import { getItems } from '../../redux/contactsSelectors';
-import { itemsSlice } from '../../redux/myContacts/filterSlice';
-
-const idName = nanoid();
-const idNumber = nanoid();
 
 export const ContactsReviewForm = () => {
-  const items = useSelector(getItems);
-  const dispatch = useDispatch();
+  const [createContact, { isLoading: isUpdating }] = useCreateContactMutation();
+  const { data: contacts } = useFetchContactsQuery();
 
-  const handleSubmit = ({ name, number }, { resetForm }) => {
-    const contactsNames = items.map(item => item.name);
+  const handleSubmit = ({ name, phone }, { resetForm }) => {
+    const contactsNames = contacts.map(contact => contact.name);
     if (contactsNames.includes(name)) {
-      alert(` ${name} is already in contacts.`);
+      toast.error(` ${name} is already in contacts.`, {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
     } else {
-      const newPerson = {
-        name,
-        number,
-      };
-      dispatch(itemsSlice.actions.addContact(newPerson));
+      createContact({ name, phone });
+      toast.success('A new contact has been added!');
+      resetForm();
     }
-    resetForm();
   };
 
   return (
-    <Formik initialValues={{ name: '', number: '' }} onSubmit={handleSubmit}>
+    <Formik initialValues={{ name: '', phone: '' }} onSubmit={handleSubmit}>
       <Box>
         <InputName>
           Name
@@ -38,7 +42,6 @@ export const ContactsReviewForm = () => {
             pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
             title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
             required
-            id={idName}
             placeholder="Enter new name"
           />
         </InputName>
@@ -47,15 +50,18 @@ export const ContactsReviewForm = () => {
           <Input
             autoComplete="off"
             type="tel"
-            name="number"
+            name="phone"
             pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
             title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
             required
-            id={idNumber}
             placeholder="Enter new phone number"
           />
         </InputName>
-        <SubmitButton type="submit">Add contacts</SubmitButton>
+        <SubmitButton type="submit" disabled={isUpdating}>
+          {isUpdating && <Spinner size={17} />}
+
+          <p>Add Contact</p>
+        </SubmitButton>
       </Box>
     </Formik>
   );
